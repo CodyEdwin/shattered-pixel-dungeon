@@ -23,7 +23,9 @@ package com.shatteredpixel.shatteredpixeldungeon.ui;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
+import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.Sandbox;
 import com.shatteredpixel.shatteredpixeldungeon.SPDAction;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -34,6 +36,7 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndChallenges;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndGame;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndSandbox;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndJournal;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndKeyBindings;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndStory;
@@ -68,6 +71,7 @@ public class MenuPane extends Component {
 	private NinePatch versionOverflowBG;
 
 	private DangerIndicator danger;
+	private Button sandboxBtn;
 
 	public static final int WIDTH = 31;
 
@@ -150,6 +154,45 @@ public class MenuPane extends Component {
 		danger = new DangerIndicator();
 		add( danger );
 
+		if (Sandbox.active) {
+			sandboxBtn = new Button() {
+
+				private NinePatch bg;
+				private Image icon;
+
+				@Override
+				protected void createChildren() {
+					super.createChildren();
+					bg = Chrome.get(Chrome.Type.RED_BUTTON);
+					add(bg);
+					icon = Icons.get(Icons.SKULL);
+					add(icon);
+				}
+
+				@Override
+				protected void layout() {
+					super.layout();
+					bg.x = x;
+					bg.y = y;
+					bg.size(width, height);
+					icon.x = x + (width - icon.width()) / 2f;
+					icon.y = y + (height - icon.height()) / 2f;
+					PixelScene.align(icon);
+				}
+
+				@Override
+				protected void onClick() {
+					GameScene.show(new WndSandbox());
+				}
+
+				@Override
+				protected String hoverText() {
+					return Messages.get(WndSandbox.class, "title");
+				}
+			};
+			add(sandboxBtn);
+		}
+
 		add( pickedUp = new Toolbar.PickedUpItem());
 	}
 
@@ -207,7 +250,12 @@ public class MenuPane extends Component {
 			challengeButton.setRect(challengeIcon.x, challengeIcon.y, challengeIcon.width(), challengeIcon.height() + challengeText.height());
 		}
 
-		danger.setPos( x + WIDTH - danger.width(), y + bg.height + 1 );
+		float below = y + bg.height + 1;
+		if (sandboxBtn != null) {
+			sandboxBtn.setRect( x, below, WIDTH, 16 );
+			below += 17;
+		}
+		danger.setPos( x + WIDTH - danger.width(), below );
 		danger.setSize( camera.width - danger.width(), danger.height());
 	}
 

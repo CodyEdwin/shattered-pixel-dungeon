@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.windows;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.GamesInProgress;
+import com.shatteredpixel.shatteredpixeldungeon.Sandbox;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -50,8 +51,21 @@ public class WndGame extends Window {
 		
 		super();
 
-		//settings
 		RedButton curBtn;
+
+		if (Sandbox.active) {
+			addButton( curBtn = new RedButton( Messages.get(this, "sandbox") ) {
+				@Override
+				protected void onClick() {
+					hide();
+					GameScene.show(new WndSandbox());
+				}
+			});
+			curBtn.icon(Icons.get(Icons.SKULL));
+			curBtn.textColor(0xFF88FF);
+		}
+
+		//settings
 		addButton( curBtn = new RedButton( Messages.get(this, "settings") ) {
 			@Override
 			protected void onClick() {

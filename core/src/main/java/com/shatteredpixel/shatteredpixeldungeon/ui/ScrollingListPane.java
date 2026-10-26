@@ -35,6 +35,10 @@ public class ScrollingListPane extends ScrollPane {
 
 	private static final int ITEM_HEIGHT	= 18;
 
+	public static int itemHeight(){
+		return ITEM_HEIGHT;
+	}
+
 	public ScrollingListPane(){
 		super(new Component());
 	}

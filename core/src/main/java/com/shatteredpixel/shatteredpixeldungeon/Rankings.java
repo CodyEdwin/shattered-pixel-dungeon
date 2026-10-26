@@ -82,6 +82,10 @@ public enum Rankings {
 
 	public void submit( boolean win, Object cause ) {
 
+		if (Sandbox.active) {
+			return;
+		}
+
 		load();
 		
 		Record rec = new Record();

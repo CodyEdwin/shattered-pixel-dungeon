@@ -402,12 +402,18 @@ public class HeroSelectScene extends PixelScene {
 	}
 
 	private void updateOptionsColor(){
-		if (!SPDSettings.customSeed().isEmpty()){
+		if (SPDSettings.sandbox()){
+			btnOptions.icon().hardlight(1f, 0.45f, 1.6f);
+			startBtn.textColor(0xFF88FF);
+		} else if (!SPDSettings.customSeed().isEmpty()){
 			btnOptions.icon().hardlight(1f, 1.5f, 0.67f);
+			startBtn.textColor(Window.TITLE_COLOR);
 		} else if (SPDSettings.challenges() != 0){
 			btnOptions.icon().hardlight(2f, 1.33f, 0.5f);
+			startBtn.textColor(Window.TITLE_COLOR);
 		} else {
 			btnOptions.icon().resetColor();
+			startBtn.textColor(Window.TITLE_COLOR);
 		}
 	}
 
@@ -636,6 +642,32 @@ public class HeroSelectScene extends PixelScene {
 
 			buttons = new ArrayList<>();
 			spacers = new ArrayList<>();
+
+			StyledButton sandboxButton = new StyledButton(Chrome.Type.BLANK, Messages.get(HeroSelectScene.class, "sandbox"), 6){
+				@Override
+				protected void onClick() {
+					ShatteredPixelDungeon.scene().addToFront(new WndOptions(
+							Icons.get(Icons.SKULL),
+							Messages.get(HeroSelectScene.class, "sandbox"),
+							Messages.get(HeroSelectScene.class, "sandbox_desc"),
+							Messages.get(HeroSelectScene.class, "sandbox_on"),
+							Messages.get(HeroSelectScene.class, "sandbox_off")){
+						@Override
+						protected void onSelect(int index) {
+							SPDSettings.sandbox(index == 0);
+							if (SPDSettings.sandbox()) icon.hardlight(1f, 0.45f, 1.6f);
+							else icon.resetColor();
+							updateOptionsColor();
+						}
+					});
+				}
+			};
+			sandboxButton.leftJustify = true;
+			sandboxButton.icon(Icons.get(Icons.SKULL));
+			if (SPDSettings.sandbox()) sandboxButton.icon().hardlight(1f, 0.45f, 1.6f);
+			buttons.add(sandboxButton);
+			add(sandboxButton);
+
 			StyledButton seedButton = new StyledButton(Chrome.Type.BLANK, Messages.get(HeroSelectScene.class, "custom_seed"), 6){
 				@Override
 				protected void onClick() {

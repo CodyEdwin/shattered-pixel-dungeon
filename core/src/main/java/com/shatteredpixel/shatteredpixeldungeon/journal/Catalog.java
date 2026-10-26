@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.journal;
 
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.Sandbox;
 import com.shatteredpixel.shatteredpixeldungeon.items.Amulet;
 import com.shatteredpixel.shatteredpixeldungeon.items.Ankh;
 import com.shatteredpixel.shatteredpixeldungeon.items.ArcaneResin;
@@ -306,6 +307,7 @@ public enum Catalog {
 	}
 	
 	public static void setSeen(Class<?> cls){
+		if (Sandbox.active) return;
 		for (Catalog cat : values()) {
 			if (cat.seen.containsKey(cls) && !cat.seen.get(cls)) {
 				cat.seen.put(cls, true);
@@ -329,6 +331,7 @@ public enum Catalog {
 	}
 
 	public static void countUses(Class<?> cls, int uses){
+		if (Sandbox.active) return;
 		for (Catalog cat : values()) {
 			if (cat.useCount.containsKey(cls) && cat.useCount.get(cls) != Integer.MAX_VALUE) {
 				cat.useCount.put(cls, cat.useCount.get(cls)+uses);

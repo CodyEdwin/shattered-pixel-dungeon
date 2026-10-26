@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Bones;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.Sandbox;
 import com.shatteredpixel.shatteredpixeldungeon.GamesInProgress;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
@@ -391,10 +392,13 @@ public class Hero extends Char {
 	}
 
 	public int talentPointsAvailable(int tier){
-		if (lvl < (Talent.tierLevelThresholds[tier] - 1)
-			|| (tier == 3 && subClass == HeroSubClass.NONE)
+		if ((tier == 3 && subClass == HeroSubClass.NONE)
 			|| (tier == 4 && armorAbility == null)) {
 			return 0;
+		} else if (lvl < (Talent.tierLevelThresholds[tier] - 1)) {
+			int bonus = Sandbox.bonusTalents(tier);
+			if (bonus <= 0) return 0;
+			return Math.max(0, bonus - talentPointsSpent(tier));
 		} else if (lvl >= Talent.tierLevelThresholds[tier+1]){
 			return Talent.tierLevelThresholds[tier+1] - Talent.tierLevelThresholds[tier] - talentPointsSpent(tier) + bonusTalentPoints(tier);
 		} else {
@@ -407,12 +411,48 @@ public class Hero extends Char {
 				|| (tier == 3 && subClass == HeroSubClass.NONE)
 				|| (tier == 4 && armorAbility == null)) {
 			return 0;
-		} else if (buff(PotionOfDivineInspiration.DivineInspirationTracker.class) != null
-					&& buff(PotionOfDivineInspiration.DivineInspirationTracker.class).isBoosted(tier)) {
-			return 2;
-		} else {
-			return 0;
 		}
+		int extra = Sandbox.bonusTalents(tier);
+		if (buff(PotionOfDivineInspiration.DivineInspirationTracker.class) != null
+					&& buff(PotionOfDivineInspiration.DivineInspirationTracker.class).isBoosted(tier)) {
+			return 2 + extra;
+		} else {
+			return extra;
+		}
+	}
+
+	public void setSandboxLevel( int level, int exp ) {
+		level = Math.max( 1, Math.min( MAX_LEVEL, level ) );
+		int delta = level - lvl;
+		lvl = level;
+		this.exp = Math.max( 0, Math.min( exp, maxExp( lvl ) - 1 ) );
+		attackSkill = Math.max( 1, attackSkill + delta );
+		defenseSkill = Math.max( 1, defenseSkill + delta );
+		updateHT( true );
+	}
+
+	public void setSandboxHP( int hp, int ht ) {
+		int target = Math.max( 1, Math.min( 9999, ht ) );
+		int guard = 0;
+		if (HT < target) {
+			while (HT < target && guard < 10000) {
+				HTBoost++;
+				updateHT( false );
+				guard++;
+			}
+		} else if (HT > target) {
+			while (HT > target && HT > 1 && guard < 20000) {
+				HTBoost--;
+				updateHT( false );
+				guard++;
+				if (HT > target && HTBoost < -5000) break;
+			}
+		}
+		HP = Math.max( 1, Math.min( HT, hp ) );
+	}
+
+	public void setSandboxSTR( int str ) {
+		STR = Math.max( 1, Math.min( 50, str ) );
 	}
 	
 	public String className() {
@@ -838,6 +878,8 @@ public class Hero extends Char {
 		
 		//calls to dungeon.observe will also update hero's local FOV.
 		fieldOfView = Dungeon.level.heroFOV;
+
+		Sandbox.onHeroTurn();
 
 		if (buff(Endure.EndureTracker.class) != null){
 			buff(Endure.EndureTracker.class).endEnduring();
@@ -1626,6 +1668,10 @@ public class Hero extends Char {
 
 	@Override
 	public void damage( int dmg, Object src ) {
+		if (Sandbox.godMode()) {
+			return;
+		}
+
 		if (buff(TimekeepersHourglass.timeStasis.class) != null
 				|| buff(TimeStasis.class) != null) {
 			return;
@@ -2169,6 +2215,11 @@ public class Hero extends Char {
 
 	@Override
 	public void die( Object cause ) {
+
+		if (Sandbox.godMode()) {
+			HP = Math.max( 1, HT );
+			return;
+		}
 		
 		curAction = null;
 
@@ -2258,7 +2309,9 @@ public class Hero extends Char {
 			}
 		}
 		
-		Bones.leave();
+		if (!Sandbox.active) {
+			Bones.leave();
+		}
 		
 		Dungeon.observe();
 		GameScene.updateFog();

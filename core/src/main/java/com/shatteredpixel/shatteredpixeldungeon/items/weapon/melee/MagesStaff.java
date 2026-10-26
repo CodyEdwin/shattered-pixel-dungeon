@@ -101,6 +101,13 @@ public class MagesStaff extends MeleeWeapon {
 		wand.curCharges = wand.maxCharges;
 	}
 
+	public void refillCharges() {
+		if (wand != null) {
+			wand.curCharges = wand.maxCharges;
+			wand.partialCharge = 0;
+		}
+	}
+
 	@Override
 	public ArrayList<String> actions(Hero hero) {
 		ArrayList<String> actions = super.actions( hero );

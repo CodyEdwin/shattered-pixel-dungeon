@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.Sandbox;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Electricity;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.StormCloud;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.ToxicGas;
@@ -981,6 +982,10 @@ public abstract class Char extends Actor {
 			sprite.showStatus(CharSprite.WARNING, Messages.titleCase(b.name()) + " " + dmg);
 			Splash.at( sprite.center(), -PointF.PI / 2, PointF.PI / 6, sprite.blood(), 10 );
 			return;
+		}
+
+		if (Sandbox.oneHitKills( this, src )) {
+			dmg = HP + shielding() + 1;
 		}
 
 		int shielded = dmg;

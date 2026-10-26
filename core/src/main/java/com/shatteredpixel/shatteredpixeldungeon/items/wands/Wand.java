@@ -82,6 +82,10 @@ public abstract class Wand extends Item {
 	public int maxCharges = initialCharges();
 	public int curCharges = maxCharges;
 	public float partialCharge = 0f;
+
+	public boolean usedByHero() {
+		return curUser == Dungeon.hero;
+	}
 	
 	protected Charger charger;
 	

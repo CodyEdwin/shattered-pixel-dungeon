@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
+import com.shatteredpixel.shatteredpixeldungeon.Sandbox;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.SaltCube;
@@ -62,6 +63,12 @@ public class Hunger extends Buff implements Hero.Doom {
 
 	@Override
 	public boolean act() {
+
+		if (target == Dungeon.hero && Sandbox.active && Sandbox.noHunger) {
+			if (level > 0) setHunger( 0 );
+			spend( TICK );
+			return true;
+		}
 
 		if (Dungeon.level.locked
 				|| target.buff(WellFed.class) != null
@@ -172,6 +179,11 @@ public class Hunger extends Buff implements Hero.Doom {
 
 	public int hunger() {
 		return (int)Math.ceil(level);
+	}
+
+	public void setHunger( float value ) {
+		level = Math.max( 0, value );
+		BuffIndicator.refreshHero();
 	}
 
 	@Override
