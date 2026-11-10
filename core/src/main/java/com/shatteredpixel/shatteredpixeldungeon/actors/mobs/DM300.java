@@ -473,6 +473,15 @@ public class DM300 extends Mob {
 	private boolean invulnWarned = false;
 
 	@Override
+	protected boolean prepareSandboxDeath(Object src) {
+		// Threshold HP is HT/3*(2-pylons) or HT/4*(3-pylons). Filling the count
+		// makes that threshold 0 so the hit is not restored into a supercharge.
+		supercharged = false;
+		pylonsActivated = totalPylonsToActivate();
+		return false;
+	}
+
+	@Override
 	public void damage(int dmg, Object src) {
 		if (!BossHealthBar.isAssigned()){
 			notice();
@@ -480,7 +489,7 @@ public class DM300 extends Mob {
 
 		int preHP = HP;
 		super.damage(dmg, src);
-		if (isInvulnerable(src.getClass())){
+		if (sandboxSlain || isInvulnerable(src.getClass())){
 			return;
 		}
 
@@ -566,6 +575,9 @@ public class DM300 extends Mob {
 
 	@Override
 	public boolean isAlive() {
+		if (sandboxSlain) {
+			return super.isAlive();
+		}
 		return super.isAlive() || pylonsActivated < totalPylonsToActivate();
 	}
 
@@ -573,6 +585,16 @@ public class DM300 extends Mob {
 	public void die( Object cause ) {
 
 		super.die( cause );
+
+		// Active pylons keep zapping after a sandbox kill skips their phases.
+		// He is already removed, so eliminatePylon will not try to discharge him.
+		if (sandboxSlain && Dungeon.level != null) {
+			for (Mob m : Dungeon.level.mobs.toArray(new Mob[0])) {
+				if (m instanceof Pylon) {
+					m.die(this);
+				}
+			}
+		}
 
 		GameScene.bossSlain();
 		Dungeon.level.unseal();

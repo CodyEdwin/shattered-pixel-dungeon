@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.Sandbox;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -467,6 +468,14 @@ public class DwarfKing extends Mob {
 			Statistics.qualifiedForBossChallengeBadge = false;
 		}
 
+		// Phase 2 is invulnerable and phase 3 defers damage without calling super.
+		// Jump to the final phase so the hit can actually kill him.
+		if (Sandbox.oneHitKills(this, src)) {
+			phase = 3;
+			super.damage(dmg, src);
+			return;
+		}
+
 		if (isInvulnerable(src.getClass())){
 			super.damage(dmg, src);
 			return;
@@ -540,7 +549,16 @@ public class DwarfKing extends Mob {
 	}
 
 	@Override
+	protected boolean prepareSandboxDeath(Object src) {
+		phase = 3;
+		return false;
+	}
+
+	@Override
 	public boolean isAlive() {
+		if (sandboxSlain) {
+			return super.isAlive();
+		}
 		return super.isAlive() || phase != 3;
 	}
 

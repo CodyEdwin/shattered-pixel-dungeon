@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.Sandbox;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -129,8 +130,32 @@ public class Tengu extends Mob {
 	}
 
 	@Override
+	protected boolean prepareSandboxDeath(Object src) {
+		if (!(Dungeon.level instanceof PrisonBossLevel)) {
+			return false;
+		}
+		PrisonBossLevel level = (PrisonBossLevel) Dungeon.level;
+		int guard = 0;
+		while (level.state() != PrisonBossLevel.State.WON && guard++ < 6) {
+			PrisonBossLevel.State before = level.state();
+			level.progress();
+			if (level.state() == before) {
+				break;
+			}
+		}
+		// progress() calls die() on the arena step, which unseals and drops loot.
+		return !super.isAlive();
+	}
+
+	@Override
 	public void damage(int dmg, Object src) {
 		if (!Dungeon.level.mobs.contains(this)){
+			return;
+		}
+
+		// Finish every remaining phase. The bracket logic below would restore HP.
+		if (Sandbox.oneHitKills(this, src)) {
+			super.damage(dmg, src);
 			return;
 		}
 
@@ -205,6 +230,9 @@ public class Tengu extends Mob {
 	
 	@Override
 	public boolean isAlive() {
+		if (sandboxSlain) {
+			return super.isAlive();
+		}
 		return super.isAlive() || Dungeon.level.mobs.contains(this); //Tengu has special death rules, see prisonbosslevel.progress()
 	}
 

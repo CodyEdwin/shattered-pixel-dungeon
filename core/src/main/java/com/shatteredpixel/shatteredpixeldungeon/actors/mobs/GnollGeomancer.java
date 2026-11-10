@@ -275,6 +275,9 @@ public class GnollGeomancer extends Mob {
 		inFinalBracket = curbracket == 0;
 
 		super.damage(dmg, src);
+		if (sandboxSlain) {
+			return;
+		}
 
 		abilityCooldown -= dmg/10f;
 
@@ -297,7 +300,16 @@ public class GnollGeomancer extends Mob {
 	private boolean inFinalBracket = false;
 
 	@Override
+	protected boolean prepareSandboxDeath(Object src) {
+		inFinalBracket = true;
+		return false;
+	}
+
+	@Override
 	public boolean isAlive() {
+		if (sandboxSlain) {
+			return super.isAlive();
+		}
 		//cannot die until final HP bracket, regardless of incoming dmg
 		return super.isAlive() || !inFinalBracket;
 	}

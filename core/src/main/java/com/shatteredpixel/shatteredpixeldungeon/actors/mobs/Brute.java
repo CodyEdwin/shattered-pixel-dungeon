@@ -85,6 +85,9 @@ public class Brute extends Mob {
 
 	@Override
 	public boolean isAlive() {
+		if (sandboxSlain) {
+			return super.isAlive();
+		}
 		if (super.isAlive()){
 			return true;
 		} else {

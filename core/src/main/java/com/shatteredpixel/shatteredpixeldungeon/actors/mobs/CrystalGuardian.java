@@ -152,7 +152,7 @@ public class CrystalGuardian extends Mob{
 
 	@Override
 	public boolean isAlive() {
-		if (HP <= 0){
+		if (HP <= 0 && !sandboxSlain){
 			HP = 1;
 
 			for (Buff b : buffs()){

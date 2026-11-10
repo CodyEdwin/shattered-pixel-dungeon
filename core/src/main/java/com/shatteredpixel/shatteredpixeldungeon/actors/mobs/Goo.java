@@ -266,6 +266,9 @@ public class Goo extends Mob {
 		}
 		boolean bleeding = (HP*2 <= HT);
 		super.damage(dmg, src);
+		if (sandboxSlain) {
+			return;
+		}
 		if ((HP*2 <= HT) && !bleeding){
 			BossHealthBar.bleed(true);
 			sprite.showStatus(CharSprite.WARNING, Messages.get(this, "enraged"));

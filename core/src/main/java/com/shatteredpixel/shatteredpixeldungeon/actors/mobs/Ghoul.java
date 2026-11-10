@@ -151,6 +151,10 @@ public class Ghoul extends Mob {
 
 	@Override
 	public void die(Object cause) {
+		if (sandboxSlain) {
+			super.die(cause);
+			return;
+		}
 		if (cause != Chasm.class && cause != GhoulLifeLink.class && !Dungeon.level.pit[pos]){
 			Ghoul nearby = GhoulLifeLink.searchForHost(this);
 			if (nearby != null){

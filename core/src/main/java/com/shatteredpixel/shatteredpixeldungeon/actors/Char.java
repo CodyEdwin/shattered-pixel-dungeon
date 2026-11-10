@@ -376,7 +376,7 @@ public abstract class Char extends Actor {
 		
 		boolean visibleFight = Dungeon.level.heroFOV[pos] || Dungeon.level.heroFOV[enemy.pos];
 
-		if (enemy.isInvulnerable(getClass())) {
+		if (enemy.isInvulnerable(getClass()) && !Sandbox.oneHitKills(enemy, this)) {
 
 			if (visibleFight) {
 				enemy.sprite.showStatus( CharSprite.POSITIVE, Messages.get(this, "invulnerable") );
@@ -834,9 +834,46 @@ public abstract class Char extends Actor {
 		return cachedIncomingDOT;
 	}
 	
+	/** Set while a sandbox one-hit is resolving, so phase logic cannot undo the kill. */
+	protected boolean sandboxSlain;
+
+	/**
+	 * Sandbox one-hit is about to zero HP. Bosses override this to enter a state
+	 * where {@link #isAlive()} can become false, and to clear phase adds.
+	 * @return true if the subclass already finished the kill, including {@link #die}.
+	 */
+	protected boolean prepareSandboxDeath( Object src ) {
+		return false;
+	}
+
+	private void applySandboxKill( Object src ) {
+		sandboxSlain = true;
+		for (ShieldBuff s : buffs(ShieldBuff.class).toArray(new ShieldBuff[0])) {
+			s.detach();
+		}
+		if (prepareSandboxDeath(src)) {
+			return;
+		}
+		HP = 0;
+		if (!isAlive()) {
+			die(src);
+		}
+	}
+
 	public void damage( int dmg, Object src ) {
-		
-		if (!isAlive() || dmg < 0) {
+
+		if (!isAlive()) {
+			return;
+		}
+
+		// Bypass invulnerability, immunity, armor, barriers, and damage caps.
+		// Negative damage (a defense proc that absorbed the hit) still kills.
+		if (Sandbox.oneHitKills( this, src )) {
+			applySandboxKill(src);
+			return;
+		}
+
+		if (dmg < 0) {
 			return;
 		}
 
@@ -988,10 +1025,6 @@ public abstract class Char extends Actor {
 			sprite.showStatus(CharSprite.WARNING, Messages.titleCase(b.name()) + " " + dmg);
 			Splash.at( sprite.center(), -PointF.PI / 2, PointF.PI / 6, sprite.blood(), 10 );
 			return;
-		}
-
-		if (Sandbox.oneHitKills( this, src )) {
-			dmg = HP + shielding() + 1;
 		}
 
 		int shielded = dmg;

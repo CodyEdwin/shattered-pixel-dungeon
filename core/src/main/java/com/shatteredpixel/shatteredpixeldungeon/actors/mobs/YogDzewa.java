@@ -379,7 +379,25 @@ public class YogDzewa extends Mob {
 	}
 
 	@Override
+	protected boolean prepareSandboxDeath(Object src) {
+		// Phase 5 is the only phase where HP 0 counts as dead. Kill fists first
+		// so their death hook does not try to start another phase.
+		phase = 5;
+		if (Dungeon.level != null) {
+			for (Char c : Actor.chars().toArray(new Char[0])) {
+				if (c instanceof YogFist && c.isAlive()) {
+					c.die(src);
+				}
+			}
+		}
+		return false;
+	}
+
+	@Override
 	public boolean isAlive() {
+		if (sandboxSlain) {
+			return super.isAlive();
+		}
 		return super.isAlive() || phase != 5;
 	}
 
@@ -393,6 +411,8 @@ public class YogDzewa extends Mob {
 
 		int preHP = HP;
 		super.damage( dmg, src );
+
+		if (sandboxSlain) return;
 
 		if (phase == 0 || findFist() != null) return;
 
