@@ -37,6 +37,7 @@ public class WndSandboxTravel extends Window {
 		title.setRect(0, 0, w, 0);
 		add(title);
 
+		resize(w, h);
 		ScrollingListPane list = new ScrollingListPane();
 		add(list);
 		list.setRect(0, title.bottom() + 2, w, h - title.bottom() - 2);
@@ -55,8 +56,6 @@ public class WndSandboxTravel extends Window {
 		list.addTitle(Messages.get(this, "special"));
 		floor(list, 11, 1, "mining");
 		floor(list, 16, 1, "vault");
-
-		resize(w, h);
 	}
 
 	private void section(ScrollingListPane list, String titleKey, int from, int to, String nameKey) {

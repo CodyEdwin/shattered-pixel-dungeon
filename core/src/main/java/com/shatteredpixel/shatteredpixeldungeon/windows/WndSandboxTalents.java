@@ -211,6 +211,7 @@ public class WndSandboxTalents extends Window {
 			title.setRect(0, 0, w, 0);
 			add(title);
 
+			resize(w, h);
 			ScrollingListPane list = new ScrollingListPane();
 			add(list);
 			list.setRect(0, title.bottom() + 2, w, h - title.bottom() - 2);
@@ -226,7 +227,6 @@ public class WndSandboxTalents extends Window {
 					}
 				});
 			}
-			resize(w, h);
 		}
 	}
 

@@ -109,12 +109,14 @@ public class WndSandboxItems extends Window {
 			top += gridH + 1;
 		}
 
+		// Resize before the list exists. Its content camera is positioned from the
+		// window camera, which is still the empty chrome until resize() runs.
+		resize(w, h);
 		list = new ScrollingListPane();
 		add(list);
 		list.setRect(0, top, w, Math.max(40, h - top));
 		populate();
 		select(lastCat);
-		resize(w, h);
 	}
 
 	private void populate() {

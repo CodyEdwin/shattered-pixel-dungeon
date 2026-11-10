@@ -83,12 +83,12 @@ public class WndSandboxMobs extends Window {
 		int tabRows = (CATS.length + cols - 1) / cols;
 		top += tabRows * (btnH + 2);
 
+		resize(w, h);
 		list = new ScrollingListPane();
 		add(list);
 		list.setRect(0, top, w, Math.max(40, h - top));
 		populate();
 		select(lastCat);
-		resize(w, h);
 	}
 
 	private void populate() {

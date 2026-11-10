@@ -30,6 +30,7 @@ import com.watabou.input.KeyEvent;
 import com.watabou.input.PointerEvent;
 import com.watabou.noosa.Camera;
 import com.watabou.noosa.Game;
+import com.watabou.noosa.Gizmo;
 import com.watabou.noosa.Group;
 import com.watabou.noosa.NinePatch;
 import com.watabou.noosa.PointerArea;
@@ -142,6 +143,7 @@ public class Window extends Group implements Signal.Listener<KeyEvent> {
 		camera.y += yOffset * camera.zoom;
 
 		shadow.boxRect( camera.x / camera.zoom, camera.y / camera.zoom, chrome.width(), chrome.height );
+		layoutScrollPanes();
 	}
 
 	public Point getOffset(){
@@ -152,7 +154,6 @@ public class Window extends Group implements Signal.Listener<KeyEvent> {
 		offset(offset.x, offset.y);
 	}
 
-	//windows with scroll panes will likely need to override this and refresh them when offset changes
 	public void offset( int xOffset, int yOffset ){
 		camera.x -= this.xOffset * camera.zoom;
 		this.xOffset = xOffset;
@@ -163,6 +164,20 @@ public class Window extends Group implements Signal.Listener<KeyEvent> {
 		camera.y += yOffset * camera.zoom;
 
 		shadow.boxRect( camera.x / camera.zoom, camera.y / camera.zoom, chrome.width(), chrome.height );
+		layoutScrollPanes();
+	}
+
+	// Scroll pane content uses its own camera, placed from this window's camera.
+	// Resize and offset move the window camera, so the content camera has to follow
+	// or the list draws outside the chrome (portrait phones shift it down and right).
+	private void layoutScrollPanes() {
+		for (int i = 0; i < length; i++) {
+			Gizmo g = members.get( i );
+			if (g instanceof ScrollPane) {
+				ScrollPane pane = (ScrollPane) g;
+				pane.setPos( pane.left(), pane.top() );
+			}
+		}
 	}
 
 	//ensures the window, with offset, does not go beyond a given margin
