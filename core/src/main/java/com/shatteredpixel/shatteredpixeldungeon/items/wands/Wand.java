@@ -86,6 +86,11 @@ public abstract class Wand extends Item {
 	public boolean usedByHero() {
 		return curUser == Dungeon.hero;
 	}
+
+	/** Hero zap, or a hero ability that uses a fresh wand instance as the damage source. */
+	public boolean heroDamageSource() {
+		return curUser == null || curUser == Dungeon.hero;
+	}
 	
 	protected Charger charger;
 	

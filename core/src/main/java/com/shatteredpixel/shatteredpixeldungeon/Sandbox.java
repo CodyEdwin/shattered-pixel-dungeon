@@ -27,6 +27,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.ClericSpell;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.EnergyCrystal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
@@ -35,6 +37,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
+import com.shatteredpixel.shatteredpixeldungeon.items.quest.Pickaxe;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
@@ -161,11 +164,12 @@ public class Sandbox {
 		return active && fullMap;
 	}
 
-	/** Hero melee, thrown attacks, and wand zaps. */
+	/** Hero melee, thrown attacks, wand zaps, cleric spells, and armor abilities. */
 	public static boolean oneHitKills( Char target, Object src ) {
 		if (!active || !oneHit || target == null || target == Dungeon.hero) return false;
 		if (src == Dungeon.hero) return true;
-		return src instanceof Wand && ((Wand) src).usedByHero();
+		if (src instanceof Wand) return ((Wand) src).heroDamageSource();
+		return src instanceof ClericSpell || src instanceof ArmorAbility || src instanceof Pickaxe;
 	}
 
 	public static void onHeroTurn() {

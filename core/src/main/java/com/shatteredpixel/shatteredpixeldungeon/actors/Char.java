@@ -618,6 +618,12 @@ public abstract class Char extends Actor {
 	}
 
 	public static boolean hit( Char attacker, Char defender, float accMulti, boolean magic ) {
+		// Sandbox one-hit skips the accuracy roll entirely, including infinite evasion
+		// (monks, great crabs, parry, spirit hawk) which otherwise beats infinite accuracy.
+		if (Sandbox.oneHitKills( defender, attacker )) {
+			return true;
+		}
+
 		float acuStat = attacker.attackSkill( defender );
 		float defStat = defender.defenseSkill( attacker );
 
